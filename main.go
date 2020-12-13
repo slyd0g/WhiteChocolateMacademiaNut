@@ -13,7 +13,7 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-// DebugData is JSON structure returned by Chrome
+// DebugData is JSON structure returned by Chromium
 type DebugData struct {
 	Description          string `json:"description"`
 	DevtoolsFrontendURL  string `json:"devtoolsFrontendUrl"`
@@ -25,18 +25,18 @@ type DebugData struct {
 	WebSocketDebuggerURL string `json:"webSocketDebuggerUrl"`
 }
 
-// WebsocketResponseRoot is the raw response from Chrome websocket
+// WebsocketResponseRoot is the raw response from Chromium websocket
 type WebsocketResponseRoot struct {
 	ID     int                     `json:"id"`
 	Result WebsocketResponseNested `json:"result"`
 }
 
-// WebsocketResponseNested is the object within the the raw response from Chrome websocket
+// WebsocketResponseNested is the object within the the raw response from Chromium websocket
 type WebsocketResponseNested struct {
 	Cookies []Cookie `json:"cookies"`
 }
 
-// Cookie is JSON structure returned by Chrome websocket
+// Cookie is JSON structure returned by Chromium websocket
 type Cookie struct {
 	Name     string  `json:"name"`
 	Value    string  `json:"value"`
@@ -60,7 +60,7 @@ type LightCookie struct {
 	Expires float64 `json:"expirationDate"`
 }
 
-// GetDebugData interacts with Chrome debug port to obtain the JSON response of open tabs/installed extensions
+// GetDebugData interacts with Chromium debug port to obtain the JSON response of open tabs/installed extensions
 func GetDebugData(debugPort string) []DebugData {
 
 	// Create debugURL from user input
@@ -88,7 +88,7 @@ func GetDebugData(debugPort string) []DebugData {
 	return debugList
 }
 
-// PrintDebugData takes the JSON response from Google Chrome and prints open tabs and extensions
+// PrintDebugData takes the JSON response from Chromium and prints open tabs and  installed extensions
 func PrintDebugData(debugList []DebugData) {
 	for _, value := range debugList {
 		fmt.Printf("Title: %s\n", value.Title)
@@ -97,7 +97,7 @@ func PrintDebugData(debugList []DebugData) {
 	}
 }
 
-// DumpCookies interacts with the webSocketDebuggerUrl to obtain Chrome cookies
+// DumpCookies interacts with the webSocketDebuggerUrl to obtain Chromium cookies
 func DumpCookies(debugList []DebugData, format string) {
 
 	// Obtain WebSocketDebuggerURL from DebugData list
@@ -124,7 +124,7 @@ func DumpCookies(debugList []DebugData, format string) {
 		log.Fatalln(err)
 	}
 
-	// Print cookies in raw format as returned by Chrome websocket
+	// Print cookies in raw format as returned by Chromium websocket
 	if format == "raw" {
 		fmt.Printf("%s\n", rawResponse)
 		os.Exit(0)
@@ -175,7 +175,7 @@ func DumpCookies(debugList []DebugData, format string) {
 func main() {
 
 	// Create new parser object
-	parser := argparse.NewParser("WhiteChocolateMacademia", "Interact with Google Chrome debug port to view open tabs, installed Chrome extensions, and cookies")
+	parser := argparse.NewParser("WhiteChocolateMacademia", "Interact with Chromium debug port to view open tabs, installed extensions, and cookies")
 
 	// Create arguments
 	var debugPort *string = parser.String("p", "port", &argparse.Options{Required: true, Help: "Debug port"})
@@ -191,7 +191,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Enumerate open tabs and installed Chrome extensions
+	// Enumerate open tabs and installed extensions
 	if *dump == "pages" {
 		debugList := GetDebugData(*debugPort)
 		PrintDebugData(debugList)
