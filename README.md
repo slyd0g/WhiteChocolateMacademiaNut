@@ -3,7 +3,7 @@
 ![WhiteChocolateMacademiaNut](./example.png)
 
 ## Description
-Interacts with [Chromium's debug port](https://blog.chromium.org/2011/05/remote-debugging-with-chrome-developer.html) to view open tabs, installed extensions, and cookies. Can be used against Google Chrome and Microsoft Edge.
+Interacts with [Chromium-based browsers' debug port](https://blog.chromium.org/2011/05/remote-debugging-with-chrome-developer.html) to view open tabs, installed extensions, and cookies. Tested against Google Chrome and Microsoft Edge.
 
 ## Usage
 - Dump the user's open tabs and installed extensions

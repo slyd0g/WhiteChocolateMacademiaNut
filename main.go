@@ -175,7 +175,7 @@ func DumpCookies(debugList []DebugData, format string) {
 func main() {
 
 	// Create new parser object
-	parser := argparse.NewParser("WhiteChocolateMacademia", "Interact with Chromium debug port to view open tabs, installed extensions, and cookies")
+	parser := argparse.NewParser("WhiteChocolateMacademia", "Interact with Chromium-based browsers' debug port to view open tabs, installed extensions, and cookies")
 
 	// Create arguments
 	var debugPort *string = parser.String("p", "port", &argparse.Options{Required: true, Help: "Debug port"})
