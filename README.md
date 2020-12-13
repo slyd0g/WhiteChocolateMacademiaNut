@@ -17,3 +17,4 @@ Interacts with [Google Chrome's debug port](https://blog.chromium.org/2011/05/re
 
 ## References
 - https://mango.pdf.zone/stealing-chrome-cookies-without-a-password
+- https://github.com/defaultnamehere/cookie_crimes
