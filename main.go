@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/akamensky/argparse"
@@ -98,7 +99,14 @@ func PrintDebugData(debugList []DebugData) {
 }
 
 // DumpCookies interacts with the webSocketDebuggerUrl to obtain Chromium cookies
-func DumpCookies(debugList []DebugData, format string) {
+func DumpCookies(debugList []DebugData, format string, grep string) {
+
+	// Check length of grep to see if filtering was requested
+	var grepFlag = false
+
+	if len(grep) > 0 {
+		grepFlag = true
+	}
 
 	// Obtain WebSocketDebuggerURL from DebugData list
 	var websocketURL = debugList[0].WebSocketDebuggerURL
@@ -136,16 +144,32 @@ func DumpCookies(debugList []DebugData, format string) {
 		lightCookieList := []LightCookie{}
 
 		for _, value := range websocketResponseRoot.Result.Cookies {
-			// Turns Cookie into LightCookie with modified expires field
-			var lightCookie LightCookie
+			if grepFlag {
+				if strings.Contains(value.Name, grep) || strings.Contains(value.Domain, grep) {
+					// Turns Cookie into LightCookie with modified expires field
+					var lightCookie LightCookie
 
-			lightCookie.Name = value.Name
-			lightCookie.Value = value.Value
-			lightCookie.Domain = value.Domain
-			lightCookie.Path = value.Path
-			lightCookie.Expires = (float64)(time.Now().Unix() + (10 * 365 * 24 * 60 * 60))
+					lightCookie.Name = value.Name
+					lightCookie.Value = value.Value
+					lightCookie.Domain = value.Domain
+					lightCookie.Path = value.Path
+					lightCookie.Expires = (float64)(time.Now().Unix() + (10 * 365 * 24 * 60 * 60))
 
-			lightCookieList = append(lightCookieList, lightCookie)
+					lightCookieList = append(lightCookieList, lightCookie)
+				}
+			} else {
+				// Turns Cookie into LightCookie with modified expires field
+				var lightCookie LightCookie
+
+				lightCookie.Name = value.Name
+				lightCookie.Value = value.Value
+				lightCookie.Domain = value.Domain
+				lightCookie.Path = value.Path
+				lightCookie.Expires = (float64)(time.Now().Unix() + (10 * 365 * 24 * 60 * 60))
+
+				lightCookieList = append(lightCookieList, lightCookie)
+			}
+
 		}
 
 		lightCookieJSON, err := json.Marshal(lightCookieList)
@@ -158,29 +182,48 @@ func DumpCookies(debugList []DebugData, format string) {
 
 	// Default to printing cookies in human format
 	for _, value := range websocketResponseRoot.Result.Cookies {
-		fmt.Printf("name: %s\n", value.Name)
-		fmt.Printf("value: %s\n", value.Value)
-		fmt.Printf("domain: %s\n", value.Domain)
-		fmt.Printf("path: %s\n", value.Path)
-		fmt.Printf("expires: %f\n", value.Expires)
-		fmt.Printf("size: %d\n", value.Size)
-		fmt.Printf("httpOnly: %t\n", value.HTTPOnly)
-		fmt.Printf("secure: %t\n", value.Secure)
-		fmt.Printf("session: %t\n", value.Session)
-		fmt.Printf("sameSite: %s\n", value.SameSite)
-		fmt.Printf("priority: %s\n\n", value.Priority)
+		if grepFlag {
+			if strings.Contains(value.Name, grep) || strings.Contains(value.Domain, grep) {
+				fmt.Printf("name: %s\n", value.Name)
+				fmt.Printf("value: %s\n", value.Value)
+				fmt.Printf("domain: %s\n", value.Domain)
+				fmt.Printf("path: %s\n", value.Path)
+				fmt.Printf("expires: %f\n", value.Expires)
+				fmt.Printf("size: %d\n", value.Size)
+				fmt.Printf("httpOnly: %t\n", value.HTTPOnly)
+				fmt.Printf("secure: %t\n", value.Secure)
+				fmt.Printf("session: %t\n", value.Session)
+				fmt.Printf("sameSite: %s\n", value.SameSite)
+				fmt.Printf("priority: %s\n\n", value.Priority)
+			}
+
+		} else {
+			fmt.Printf("name: %s\n", value.Name)
+			fmt.Printf("value: %s\n", value.Value)
+			fmt.Printf("domain: %s\n", value.Domain)
+			fmt.Printf("path: %s\n", value.Path)
+			fmt.Printf("expires: %f\n", value.Expires)
+			fmt.Printf("size: %d\n", value.Size)
+			fmt.Printf("httpOnly: %t\n", value.HTTPOnly)
+			fmt.Printf("secure: %t\n", value.Secure)
+			fmt.Printf("session: %t\n", value.Session)
+			fmt.Printf("sameSite: %s\n", value.SameSite)
+			fmt.Printf("priority: %s\n\n", value.Priority)
+		}
+
 	}
 }
 
 func main() {
 
 	// Create new parser object
-	parser := argparse.NewParser("WhiteChocolateMacademia", "Interact with Chromium-based browsers' debug port to view open tabs, installed extensions, and cookies")
+	parser := argparse.NewParser("WhiteChocolateMacademia", "Interact with Chromium-based browsers' debug port to view open tabs, installed extensions, and cookies (https://github.com/slyd0g/WhiteChocolateMacademiaNut)")
 
 	// Create arguments
-	var debugPort *string = parser.String("p", "port", &argparse.Options{Required: true, Help: "Debug port"})
-	var dump *string = parser.String("d", "dump", &argparse.Options{Required: true, Help: "{ pages || cookies } - Dump open tabs/extensions or cookies"})
+	var debugPort *string = parser.String("p", "port", &argparse.Options{Required: true, Help: "{REQUIRED} - Debug port"})
+	var dump *string = parser.String("d", "dump", &argparse.Options{Required: true, Help: "{REQUIRED} - { pages || cookies } - Dump open tabs/extensions or cookies"})
 	var format *string = parser.String("f", "format", &argparse.Options{Required: false, Help: "{ raw || human || modified } - Format when dumping cookies"})
+	var grep *string = parser.String("g", "grep", &argparse.Options{Required: false, Help: "Narrow scope of cookie dumping to specific name/domain"})
 
 	// Parse arguments
 	err := parser.Parse(os.Args)
@@ -200,6 +243,6 @@ func main() {
 	// Dump cookies
 	if *dump == "cookies" {
 		debugList := GetDebugData(*debugPort)
-		DumpCookies(debugList, *format)
+		DumpCookies(debugList, *format, *grep)
 	}
 }
