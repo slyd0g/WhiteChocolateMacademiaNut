@@ -16,8 +16,8 @@ Interacts with [Chromium-based browsers' debug port](https://blog.chromium.org/2
     - ```./WhiteChocolateMacademiaNut -p 666 -d cookies -f modified```
 - Dump the user's cookies in JSON if the cookie name or domain field contains `github` and modifies the expirationDate attribute
     - ```./WhiteChocolateMacademiaNut -p 4321 -d cookies -f modified -g github```
-- Dump the user's cookies in human-readable format if the cookie name or domain field contains `facebook`
-    -  ```./WhiteChocolateMacademiaNut --port 31415 --dump cookies --format human --grep facebook```
+- Dump the user's cookies in human-readable format if the page title or url contains `facebook`
+    -  ```./WhiteChocolateMacademiaNut --port 31415 --dump pages --grep facebook```
 
 ## References
 - https://mango.pdf.zone/stealing-chrome-cookies-without-a-password

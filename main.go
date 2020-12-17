@@ -90,11 +90,30 @@ func GetDebugData(debugPort string) []DebugData {
 }
 
 // PrintDebugData takes the JSON response from Chromium and prints open tabs and  installed extensions
-func PrintDebugData(debugList []DebugData) {
+func PrintDebugData(debugList []DebugData, grep string) {
+
+	// Check length of grep to see if filtering was requested
+	var grepFlag = false
+
+	if len(grep) > 0 {
+		grepFlag = true
+	}
+
 	for _, value := range debugList {
-		fmt.Printf("Title: %s\n", value.Title)
-		fmt.Printf("Type: %s\n", value.PageType)
-		fmt.Printf("URL: %s\n\n", value.URL)
+		if grepFlag {
+			if strings.Contains(value.Title, grep) || strings.Contains(value.URL, grep) {
+				fmt.Printf("Title: %s\n", value.Title)
+				fmt.Printf("Type: %s\n", value.PageType)
+				fmt.Printf("URL: %s\n", value.URL)
+				fmt.Printf("WebSocket Debugger URL: %s\n\n", value.WebSocketDebuggerURL)
+			}
+		} else {
+			fmt.Printf("Title: %s\n", value.Title)
+			fmt.Printf("Type: %s\n", value.PageType)
+			fmt.Printf("URL: %s\n", value.URL)
+			fmt.Printf("WebSocket Debugger URL: %s\n\n", value.WebSocketDebuggerURL)
+		}
+
 	}
 }
 
@@ -223,7 +242,7 @@ func main() {
 	var debugPort *string = parser.String("p", "port", &argparse.Options{Required: true, Help: "{REQUIRED} - Debug port"})
 	var dump *string = parser.String("d", "dump", &argparse.Options{Required: true, Help: "{REQUIRED} - { pages || cookies } - Dump open tabs/extensions or cookies"})
 	var format *string = parser.String("f", "format", &argparse.Options{Required: false, Help: "{ raw || human || modified } - Format when dumping cookies"})
-	var grep *string = parser.String("g", "grep", &argparse.Options{Required: false, Help: "Narrow scope of cookie dumping to specific name/domain"})
+	var grep *string = parser.String("g", "grep", &argparse.Options{Required: false, Help: "Narrow scope of dumping to specific name/domain"})
 
 	// Parse arguments
 	err := parser.Parse(os.Args)
@@ -237,7 +256,7 @@ func main() {
 	// Enumerate open tabs and installed extensions
 	if *dump == "pages" {
 		debugList := GetDebugData(*debugPort)
-		PrintDebugData(debugList)
+		PrintDebugData(debugList, *grep)
 	}
 
 	// Dump cookies
