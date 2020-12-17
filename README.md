@@ -5,6 +5,9 @@
 ## Description
 Interacts with [Chromium-based browsers' debug port](https://blog.chromium.org/2011/05/remote-debugging-with-chrome-developer.html) to view open tabs, installed extensions, and cookies. Tested against Google Chrome and Microsoft Edge.
 
+## Blogpost
+- https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e
+
 ## Usage
 - Dump the user's open tabs and installed extensions
     - ```./WhiteChocolateMacademiaNut -p 4200 -d pages```
