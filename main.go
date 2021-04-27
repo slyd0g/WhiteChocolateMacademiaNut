@@ -233,6 +233,41 @@ func DumpCookies(debugList []DebugData, format string, grep string) {
 	}
 }
 
+func ClearCookies(debugList []DebugData){
+	var websocketURL = debugList[0].WebSocketDebuggerURL
+  
+	// Connect to websocket
+	ws, err := websocket.Dial(websocketURL, "", "http://localhost/")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Send message to websocket
+	var message = "{\"id\": 1, \"method\": \"Network.clearBrowserCookies\"}"
+	websocket.Message.Send(ws, message)
+
+}
+
+func LoadCookies(debugList []DebugData, load string){
+	// Read cookies
+	content, err := ioutil.ReadFile(load)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var websocketURL = debugList[0].WebSocketDebuggerURL
+
+	// Connect to websocket
+	ws, err := websocket.Dial(websocketURL, "", "http://localhost/")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Send message to websocket
+	var message = fmt.Sprintf("{\"id\": 1, \"method\":\"Network.setCookies\", \"params\":{\"cookies\":%s}}", content)
+	websocket.Message.Send(ws, message)
+}
+
 func main() {
 
 	// Create new parser object
@@ -240,10 +275,11 @@ func main() {
 
 	// Create arguments
 	var debugPort *string = parser.String("p", "port", &argparse.Options{Required: true, Help: "{REQUIRED} - Debug port"})
-	var dump *string = parser.String("d", "dump", &argparse.Options{Required: true, Help: "{REQUIRED} - { pages || cookies } - Dump open tabs/extensions or cookies"})
+	var dump *string = parser.String("d", "dump", &argparse.Options{Required: false, Help: "{ pages || cookies } - Dump open tabs/extensions or cookies"})
 	var format *string = parser.String("f", "format", &argparse.Options{Required: false, Help: "{ raw || human || modified } - Format when dumping cookies"})
 	var grep *string = parser.String("g", "grep", &argparse.Options{Required: false, Help: "Narrow scope of dumping to specific name/domain"})
-
+	var load *string = parser.String("l", "load", &argparse.Options{Required: false, Help: "File name for cookies to load into browser"})
+	var clear *string = parser.String("c", "clear", &argparse.Options{Required: false, Help: "Clear cookies before loading new cookies"})
 	// Parse arguments
 	err := parser.Parse(os.Args)
 	if err != nil {
@@ -253,15 +289,27 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Enumerate open tabs and installed extensions
-	if *dump == "pages" {
-		debugList := GetDebugData(*debugPort)
-		PrintDebugData(debugList, *grep)
+	if dump != nil {
+		// Enumerate open tabs and installed extensions
+		if *dump == "pages" {
+			debugList := GetDebugData(*debugPort)
+			PrintDebugData(debugList, *grep)
+		}
+
+		// Dump cookies
+		if *dump == "cookies" {
+			debugList := GetDebugData(*debugPort)
+			DumpCookies(debugList, *format, *grep)
+		}
 	}
 
-	// Dump cookies
-	if *dump == "cookies" {
+	if clear != nil {
 		debugList := GetDebugData(*debugPort)
-		DumpCookies(debugList, *format, *grep)
+		ClearCookies(debugList)
+	}
+
+	if load != nil {
+		debugList := GetDebugData(*debugPort)
+		LoadCookies(debugList, *load)
 	}
 }

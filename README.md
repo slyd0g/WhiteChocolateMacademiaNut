@@ -22,6 +22,14 @@ Interacts with [Chromium-based browsers' debug port](https://blog.chromium.org/2
 - Dump the user's cookies in human-readable format if the page title or url contains `facebook`
     -  ```./WhiteChocolateMacademiaNut --port 31415 --dump pages --grep facebook```
 
+Load and clear functions are intended to be used locally. Do not clear target's cookies. In order for this to work, you will need to start the Chromium-based browser with the debug port open. 
+
+- Load the user's cookies locally from a file
+    - ```./WhiteChocolateMacademiaNut --port 9222 --load cookies.json```
+- Clear all cookies
+    - ```./WhiteChocolateMacademiaNut --port 9222 --clear```
+
+
 ## References
 - https://mango.pdf.zone/stealing-chrome-cookies-without-a-password
 - https://github.com/defaultnamehere/cookie_crimes
