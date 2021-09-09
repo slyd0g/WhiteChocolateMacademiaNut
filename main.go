@@ -235,7 +235,7 @@ func DumpCookies(debugList []DebugData, format string, grep string) {
 
 func ClearCookies(debugList []DebugData){
 	var websocketURL = debugList[0].WebSocketDebuggerURL
-  
+
 	// Connect to websocket
 	ws, err := websocket.Dial(websocketURL, "", "http://localhost/")
 	if err != nil {
@@ -289,7 +289,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if dump != nil {
+	if *dump != "" {
 		// Enumerate open tabs and installed extensions
 		if *dump == "pages" {
 			debugList := GetDebugData(*debugPort)
@@ -303,12 +303,12 @@ func main() {
 		}
 	}
 
-	if clear != nil {
+	if *clear != "" {
 		debugList := GetDebugData(*debugPort)
 		ClearCookies(debugList)
 	}
 
-	if load != nil {
+	if *load != "" {
 		debugList := GetDebugData(*debugPort)
 		LoadCookies(debugList, *load)
 	}
