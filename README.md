@@ -13,7 +13,7 @@ Interacts with [Chromium-based browsers' debug port](https://blog.chromium.org/2
     - ```./WhiteChocolateMacademiaNut -p 4200 -d pages```
 - Dump the user's cookies in human-readable format
     - ```./WhiteChocolateMacademiaNut --port 1337 --dump cookies --format human```
-- Dump the user's cookies in raw JSON as returned by Chromium
+- Dump the user's cookies in raw JSON as returned by Chromium (compatible with [EditThisCookie extension](https://www.editthiscookie.com/))
     - ```./WhiteChocolateMacademiaNut --port 1234 --dump cookies --format raw```
 - Dump the user's cookies in JSON with the name, value, domain, path, and modified expirationDate attribute to 10 years in the future (compatible with [Cookiebro extension](https://nodetics.com/cookiebro/))
     - ```./WhiteChocolateMacademiaNut -p 666 -d cookies -f modified```
