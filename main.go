@@ -102,7 +102,7 @@ func GetDebugData(debugPort string) []DebugData {
 // GetDebugDataVersion interacts with the Chromium debug port to obtain the JSON response from /json/version
 func GetDebugDataVersion(debugPort string) DebugDataVersion {
 	// Create debugURL from user input
-	var debugURL = "http://localhost:" + debugPort + "/json"
+	var debugURL = "http://localhost:" + debugPort + "/json/version"
 
 	// Make GET request
 	resp, err := http.Get(debugURL)
