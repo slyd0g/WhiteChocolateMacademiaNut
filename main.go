@@ -14,7 +14,7 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-// DebugData is JSON structure returned by Chromium
+// DebugData is JSON structure returned by Chromium (/json)
 type DebugData struct {
 	Description          string `json:"description"`
 	DevtoolsFrontendURL  string `json:"devtoolsFrontendUrl"`
@@ -23,6 +23,16 @@ type DebugData struct {
 	Title                string `json:"title"`
 	PageType             string `json:"type"`
 	URL                  string `json:"url"`
+	WebSocketDebuggerURL string `json:"webSocketDebuggerUrl"`
+}
+
+// DebugData is a JSON structure returned by Chromium (/json/version)
+type DebugDataVersion struct {
+	Browser              string `json:"Browser"`
+	ProtocolVersion      string `json:"Protocol-Version"`
+	UserAgent            string `json:"User-Agent"`
+	V8Version            string `json:"V8-Version"`
+	WebkitVersion        string `json:"WebKit-Version"`
 	WebSocketDebuggerURL string `json:"webSocketDebuggerUrl"`
 }
 
@@ -89,6 +99,33 @@ func GetDebugData(debugPort string) []DebugData {
 	return debugList
 }
 
+// GetDebugDataVersion interacts with the Chromium debug port to obtain the JSON response from /json/version
+func GetDebugDataVersion(debugPort string) DebugDataVersion {
+	// Create debugURL from user input
+	var debugURL = "http://localhost:" + debugPort + "/json"
+
+	// Make GET request
+	resp, err := http.Get(debugURL)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	// Read GET response
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	// Unmarshal JSON response
+	var debugVersionList DebugDataVersion
+	err = json.Unmarshal(body, &debugVersionList)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	return debugVersionList
+}
+
 // PrintDebugData takes the JSON response from Chromium and prints open tabs and  installed extensions
 func PrintDebugData(debugList []DebugData, grep string) {
 
@@ -118,7 +155,7 @@ func PrintDebugData(debugList []DebugData, grep string) {
 }
 
 // DumpCookies interacts with the webSocketDebuggerUrl to obtain Chromium cookies
-func DumpCookies(debugList []DebugData, format string, grep string) {
+func DumpCookies(debugVersionData DebugDataVersion, format string, grep string) {
 
 	// Check length of grep to see if filtering was requested
 	var grepFlag = false
@@ -128,7 +165,7 @@ func DumpCookies(debugList []DebugData, format string, grep string) {
 	}
 
 	// Obtain WebSocketDebuggerURL from DebugData list
-	var websocketURL = debugList[0].WebSocketDebuggerURL
+	var websocketURL = debugVersionData.WebSocketDebuggerURL
 
 	// Connect to websocket
 	ws, err := websocket.Dial(websocketURL, "", "http://localhost/")
@@ -137,7 +174,7 @@ func DumpCookies(debugList []DebugData, format string, grep string) {
 	}
 
 	// Send message to websocket
-	var message = "{\"id\": 1, \"method\":\"Network.getAllCookies\"}"
+	var message = "{\"id\": 1, \"method\":\"Storage.getCookies\"}"
 	websocket.Message.Send(ws, message)
 
 	// Get cookies from websocket
@@ -233,7 +270,7 @@ func DumpCookies(debugList []DebugData, format string, grep string) {
 	}
 }
 
-func ClearCookies(debugList []DebugData){
+func ClearCookies(debugList []DebugData) {
 	var websocketURL = debugList[0].WebSocketDebuggerURL
 
 	// Connect to websocket
@@ -248,7 +285,7 @@ func ClearCookies(debugList []DebugData){
 
 }
 
-func LoadCookies(debugList []DebugData, load string){
+func LoadCookies(debugList []DebugData, load string) {
 	// Read cookies
 	content, err := ioutil.ReadFile(load)
 	if err != nil {
@@ -298,7 +335,7 @@ func main() {
 
 		// Dump cookies
 		if *dump == "cookies" {
-			debugList := GetDebugData(*debugPort)
+			debugList := GetDebugDataVersion(*debugPort)
 			DumpCookies(debugList, *format, *grep)
 		}
 	}
